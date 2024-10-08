@@ -1,7 +1,7 @@
 use crate::ast::{Expr, Statement};
 use nom::{
     branch::alt,
-    bytes::complete::tag,
+    bytes::complete::{tag, take_until},
     character::complete::{alpha1, digit1, multispace0},
     combinator::{map, map_res},
     multi::many0,
@@ -16,6 +16,12 @@ fn parse_number(input: &str) -> IResult<&str, Expr> {
     })(input)
 }
 
+// Parse a string literal (e.g., `"Hello, World!"`)
+fn parse_string(input: &str) -> IResult<&str, Expr> {
+    let (input, string_content) = delimited(tag("\""), take_until("\""), tag("\""))(input)?;
+    Ok((input, Expr::StringLiteral(string_content.to_string())))
+}
+
 // Parse a variable (e.g., `x`)
 fn parse_variable(input: &str) -> IResult<&str, Expr> {
     map(alpha1, |var: &str| Expr::Variable(var.to_string()))(input)
@@ -23,7 +29,7 @@ fn parse_variable(input: &str) -> IResult<&str, Expr> {
 
 // Parse an expression
 fn parse_expr(input: &str) -> IResult<&str, Expr> {
-    alt((parse_number, parse_variable))(input)
+    alt((parse_number, parse_string, parse_variable))(input)
 }
 
 // Parse a var statement (`var x = <expression>;`)

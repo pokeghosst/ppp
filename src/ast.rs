@@ -10,6 +10,7 @@ pub enum Statement {
 pub enum Expr {
     Number(i32),
     Variable(String),
+    StringLiteral(String),
     BinaryOp(Box<Expr>, BinOp, Box<Expr>),
 }
 
